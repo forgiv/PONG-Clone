@@ -19,3 +19,31 @@ class Ball:
             self.velY *= -1
         self.posX += self.velX
         self.posY += self.velY
+
+class Paddle:
+
+    def __init__ (self, surface, side, color = (255, 255, 255), length_scale = .25):
+        self.surface = surface
+        self.side = side
+        self.color = color
+        self.length = self.surface.get_height() * length_scale
+        self.width = self.surface.get_width() / 40
+        self.vel = 4
+        self.posY = self.surface.get_height() / 2 - self.length / 2
+        if side == 'left':
+            self.posX = 0
+        elif side == 'right':
+            self.posX = self.surface.get_width() - self.width
+        else:
+            print "ERROR: Paddle initialized incorrectly"
+
+    def display (self):
+        pygame.draw.rect(self.surface, self.color, (self.posX, self.posY, self.width, self.length))
+
+    def moveUp (self):
+        if not (self.posY <= 0):
+            self.posY -= self.vel
+
+    def moveDown (self):
+        if not (self.posY >= self.surface.get_height() - self.length):
+            self.posY += self.vel
