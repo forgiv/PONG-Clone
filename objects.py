@@ -1,14 +1,15 @@
-import pygame, sys, random
+import pygame, sys, random, os
+
 
 class Ball:
 
     def __init__(self, surface, color = (255, 255, 255), velX = 2, velY = 2):
         self.surface = surface
         self.posX, self.posY = surface.get_width() / 2, surface.get_height() / 2
-        self.color = (color)
+        self.color = color
         self.radius = surface.get_width() / 40
         self.maxVelX, self.maxVelY = velX, velY
-        self.vel = [random.randint(1, self.maxVelX), random.randint(1, self.maxVelY)]
+        self.vel = [random.randrange(2, self.maxVelX + 1), random.randrange(2, self.maxVelY + 1)]
 
     def display(self):
         pygame.draw.circle(self.surface, self.color, (self.posX, self.posY), self.radius)
@@ -26,9 +27,13 @@ class Ball:
     def displace(self, amount):
         self.posX += amount
 
-    def reset(self):
+    def reset(self, direction):
         self.posX, self.posY = self.surface.get_width() / 2, self.surface.get_height() / 2
-        self.vel = [random.randint(1, self.maxVelX), random.randint(1, self.maxVelY)]
+        if direction == "Right":
+            self.vel = [random.randrange(2, self.maxVelX + 1), random.randrange(2, self.maxVelY + 1)]
+        else:
+            self.vel = [random.randrange(-self.maxVelX, -1), random.randrange(-self.maxVelY, -1)]
+
 
 class Paddle:
 
@@ -72,15 +77,13 @@ class Paddle:
     def reset(self):
         self.posY = self.surface.get_height() / 2 - self.height / 2
 
+
 class Game:
 
-    def __init__(self, size):
-        pygame.init()
-        pygame.font.init()
-        pygame.key.set_repeat(0, 1)
-        self.size = self.width, self.height = size
-        self.screen = pygame.display.set_mode(size)
-        self.black = (0, 0, 0)
+    def __init__(self, surface):
+        self.screen = surface
+        self.size = self.width, self.height = self.screen.get_width(), self.screen.get_height()
+        self.black = (10, 10, 10)
         self.white = (255, 255, 255)
         self.clock = pygame.time.Clock()
         self.ball = Ball(self.screen, (255, 0, 0))
@@ -97,7 +100,7 @@ class Game:
         # Reset player an ball positions
         self.player_1.reset()
         self.player_2.reset()
-        self.ball.reset()
+        self.ball.reset("Right")
 
         # Main game loop
         while 1:
@@ -151,15 +154,56 @@ class Game:
                         if self.player_1.width / 2 <= self.ball.posX - self.ball.radius < self.player_1.width:
                             self.ball.displace(self.ball.posX - self.player_1.width)
                         self.ball.collideX()
-            elif (self.ball.posX + self.ball.radius > self.width - self.player_2.width / 2):
+            elif self.ball.posX + self.ball.radius > self.width - self.player_2.width / 2:
                 self.score[0] += 1
-                self.ball.reset()
-            elif (self.ball.posX - self.ball.radius < self.player_1.width / 2):
+                self.ball.reset("Left")
+            elif self.ball.posX - self.ball.radius < self.player_1.width / 2:
                 self.score[1] += 1
-                self.ball.reset()
+                self.ball.reset("Right")
 
             # Update ball and display
             self.ball.update()
             self.ball.display()
+
+            pygame.display.flip()
+
+
+class MainMenu:
+
+    def __init__(self, surface):
+        self.playButton = pygame.image.load(os.path.join('img', 'play_button.png'))
+        self.quitButton = pygame.image.load(os.path.join('img', 'quit_button.png'))
+        self.playButton = self.playButton.convert()
+        self.quitButton = self.quitButton.convert()
+        self.font = pygame.font.Font(None, 54)
+        self.logo = self.font.render("P0NG", 0, (255, 255, 255))
+        self.screen = surface
+        self.clock = pygame.time.Clock()
+
+    def draw(self):
+
+        while 1:
+            self.clock.tick_busy_loop(60)
+
+            # fill screen to black
+            self.screen.fill((10, 10, 10))
+
+            # draw logo
+            self.screen.blit(self.logo, (self.screen.get_width() / 2 - self.logo.get_width() / 2, 10))
+
+            # draw buttonZ
+            self.screen.blit(self.playButton, (self.screen.get_width() / 2 - self.playButton.get_width() / 2, 100))
+            self.screen.blit(self.quitButton, (self.screen.get_width() / 2 - self.quitButton.get_width() / 2, 120 + self.quitButton.get_height()))
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                if event.type == pygame.MOUSEBUTTONUP:
+                    pos = pygame.mouse.get_pos()
+                    if self.screen.get_width() / 2 - self.playButton.get_width() / 2 <= pos[0] <= self.screen.get_width() / 2 + self.playButton.get_width() / 2:
+                        if self.playButton.get_height() + 100 >= pos[1] >= 100:
+                            return
+                        elif self.quitButton.get_height() + 120 <= pos[1] <= 2 * self.quitButton.get_height() + 120:
+                            sys.exit()
 
             pygame.display.flip()
