@@ -8,7 +8,8 @@ screen = pygame.display.set_mode((640, 360))
 
 mainMenu = objects.MainMenu(screen)
 game = objects.Game(screen)
+settingsMenu = objects.SettingsMenu(screen, game.ball, game.player_1, game.player_2)
 
-
-mainMenu.draw()
-game.newGame()
+settingsMenu.draw()
+#mainMenu.draw()
+#game.newGame()

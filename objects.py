@@ -3,12 +3,12 @@ import pygame, sys, random, os
 
 class Ball:
 
-    def __init__(self, surface, color = (255, 255, 255), velX = 2, velY = 2):
+    def __init__(self, surface, color = (255, 255, 255), vel = 2):
         self.surface = surface
         self.posX, self.posY = surface.get_width() / 2, surface.get_height() / 2
         self.color = color
         self.radius = surface.get_width() / 40
-        self.maxVelX, self.maxVelY = velX, velY
+        self.maxVelX, self.maxVelY = vel, vel
         self.vel = [random.randrange(2, self.maxVelX + 1), random.randrange(2, self.maxVelY + 1)]
 
     def display(self):
@@ -34,6 +34,13 @@ class Ball:
         else:
             self.vel = [random.randrange(-self.maxVelX, -1), random.randrange(-self.maxVelY, -1)]
 
+    def changeColor(self, color):
+        self.color = color
+
+    def changeVel(self, vel):
+        self.maxVelX, self.maxVelY = vel, vel
+        self.reset("Right")
+
 
 class Paddle:
 
@@ -41,7 +48,8 @@ class Paddle:
         self.surface = surface
         self.side = side
         self.color = color
-        self.height = self.surface.get_height() * height_scale
+        self.heightScale = height_scale
+        self.height = self.surface.get_height() * self.heightScale
         self.width = self.surface.get_width() / 40
         self.vel = [0, 0]
         self.posY = self.surface.get_height() / 2 - self.height / 2
@@ -77,6 +85,13 @@ class Paddle:
     def reset(self):
         self.posY = self.surface.get_height() / 2 - self.height / 2
 
+    def changeColor(self, color):
+        self.color = color
+
+    def changeHeight(self, height_scale):
+        self.heightScale = height_scale
+        self.height = self.surface.get_height() * self.heightScale
+
 
 class Game:
 
@@ -86,7 +101,7 @@ class Game:
         self.black = (10, 10, 10)
         self.white = (255, 255, 255)
         self.clock = pygame.time.Clock()
-        self.ball = Ball(self.screen, (255, 0, 0))
+        self.ball = Ball(self.screen, (0, 0, 255))
         self.player_1 = Paddle(self.screen, 'left')
         self.player_2 = Paddle(self.screen, 'right')
         self.score = [0, 0]
@@ -189,7 +204,7 @@ class MainMenu:
             self.screen.fill((10, 10, 10))
 
             # draw logo
-            self.screen.blit(self.logo, (self.screen.get_width() / 2 - self.logo.get_width() / 2, 10))
+            self.screen.blit(self.logo, (self.screen.get_width() / 2 - self.logo.get_width() / 2, self.screen.get_height() / 20))
 
             # draw buttonZ
             self.screen.blit(self.playButton, (self.screen.get_width() / 2 - self.playButton.get_width() / 2, 100))
@@ -205,5 +220,68 @@ class MainMenu:
                             return
                         elif self.quitButton.get_height() + 120 <= pos[1] <= 2 * self.quitButton.get_height() + 120:
                             sys.exit()
+
+            pygame.display.flip()
+
+
+class SettingsMenu:
+
+    def __init__(self, surface, ball, player_1, player_2):
+        self.screen = surface
+        self.ball = ball
+        self.player_1 = player_1
+        self.player_2 = player_2
+        self.clock = pygame.time.Clock()
+        self.fontLogo = pygame.font.Font(None, 54)
+        self.fontHeading = pygame.font.Font(None, 42)
+        self.fontNormal = pygame.font.Font(None, 24)
+        self.speedButtons = [pygame.image.load(os.path.join('img', 'slow.png')), pygame.image.load(os.path.join('img', 'normal.png')), pygame.image.load(os.path.join('img', 'fast.png'))]
+        self.speedButtons = [self.speedButtons[0].convert(), self.speedButtons[1].convert(), self.speedButtons[2].convert()]
+        self.paddleSizeButtons = [pygame.image.load(os.path.join('img', 'small.png')), pygame.image.load(os.path.join('img', 'normal.png')), pygame.image.load(os.path.join('img', 'big.png'))]
+        self.paddleSizeButtons = [self.paddleSizeButtons[0].convert(), self.paddleSizeButtons[1].convert(), self.paddleSizeButtons[2].convert()]
+        self.currentHeights = [player_1.heightScale, player_2.heightScale]
+        self.currentColors = [self.ball.color, self.player_1.color, self.player_2.color]
+        self.currentVel = [ball.maxVelX, ball.maxVelY]
+
+    def draw(self):
+        WHITE = (255, 255, 255)
+        settingsLogo = self.fontLogo.render("Settings", 0, WHITE)
+        headings = [self.fontHeading.render("Ball", 0, WHITE), self.fontHeading.render("Player 1", 0, WHITE), self.fontHeading.render("Player 2", 0, WHITE)]
+        colorLabel = self.fontNormal.render("Color", 0, WHITE)
+        heightLabel = self.fontNormal.render("Height", 0, WHITE)
+        speedLabel = self.fontNormal.render("Max Speed", 0, WHITE)
+        colors = [(255, 255, 255), (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0)]
+        buttons = [self.speedButtons, self.paddleSizeButtons, self.paddleSizeButtons]
+
+        while 1:
+
+            self.clock.tick_busy_loop(60)
+
+            # background
+            self.screen.fill((10, 10, 10))
+
+            # draw settings logo
+            self.screen.blit(settingsLogo, (self.screen.get_width() / 2 - settingsLogo.get_width() / 2, self.screen.get_height() / 20))
+
+            # draw ballText and playerText
+            for i in xrange(len(headings)):
+                x = (i + 1) * self.screen.get_width() / (len(headings) + 1) - headings[i].get_width() / 2
+                self.screen.blit(headings[i], (x, self.screen.get_height() / 5))
+                self.screen.blit(colorLabel, (x, self.screen.get_height() / 5 + headings[i].get_height() + 10))
+                for j in xrange(5):
+                    pygame.draw.rect(self.screen, colors[j], (x + j * 20, self.screen.get_height() / 5 + headings[i].get_height() + 10 + colorLabel.get_height() + 10, 20, 20))
+
+            self.screen.blit(speedLabel, (self.screen.get_width() / (len(headings) + 1) - headings[0].get_width() / 2, self.screen.get_height() / 5 + headings[0].get_height() + 10 + colorLabel.get_height() + 10 + 20 + 20))
+
+            for i in xrange(2):
+                self.screen.blit(heightLabel, ((2 + i) * self.screen.get_width() / (len(headings) + 1) - headings[i + 1].get_width() / 2, self.screen.get_height() / 5 + headings[0].get_height() + 10 + colorLabel.get_height() + 10 + 20 + 20))
+
+            for i in xrange(len(buttons)):
+                self.screen.blit(buttons[i][0], ((i + 1) * self.screen.get_width() / (len(headings) + 1) - headings[i].get_width() / 2, self.screen.get_height() / 5 + headings[0].get_height() + 10 + colorLabel.get_height() + 10 + 20 + 20 + heightLabel.get_height() + 10))
+
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
 
             pygame.display.flip()
