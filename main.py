@@ -4,12 +4,22 @@ pygame.init()
 pygame.font.init()
 pygame.key.set_repeat(0, 1)
 
-screen = pygame.display.set_mode((640, 360))
+screen = pygame.display.set_mode((1280, 720))
 
 mainMenu = objects.MainMenu(screen)
 game = objects.Game(screen)
 settingsMenu = objects.SettingsMenu(screen, game.ball, game.player_1, game.player_2)
 
-settingsMenu.draw()
-#mainMenu.draw()
-#game.newGame()
+score = []
+
+while 1:
+    if mainMenu.draw() == "Settings":
+        settingsMenu.draw()
+    else:
+        while 1:
+            if len(score) == 0:
+                score = game.newGame()
+            else:
+                score = game.newGame(score)
+            if settingsMenu.draw() == "Reset":
+                score = [0, 0]
