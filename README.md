@@ -1,6 +1,10 @@
 # PONG-Clone
 A simple PONG clone written in python with pygame api.
 
+REQUIRES:
+  Python 2
+  Pygame
+
 Player controls:
 
 Player 1: 
