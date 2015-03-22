@@ -1,4 +1,5 @@
-import objects, pygame
+import objects
+import pygame
 
 pygame.init()
 pygame.font.init()
@@ -18,8 +19,8 @@ while 1:
     else:
         while 1:
             if len(score) == 0:
-                score = game.newGame()
+                score = game.new_game()
             else:
-                score = game.newGame(score)
+                score = game.new_game(score)
             if settingsMenu.draw() == "Reset":
                 score = [0, 0]
