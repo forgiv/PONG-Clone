@@ -10,3 +10,5 @@ S = DOWN
 Player 2:
 UP ARROW = UP
 DOWN ARROW = DOWN
+
+Press ESCAPE during game to access settings menu
