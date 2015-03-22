@@ -1,18 +1,18 @@
 # PONG-Clone
 A simple PONG clone written in python with pygame api.
 
-REQUIRES:
-  Python 2
-  Pygame
+REQUIRES:<br>
+Python 2<br>
+Pygame
 
 Player controls:
 
-Player 1: 
-W = UP
+Player 1:<br>
+W = UP<br>
 S = DOWN
 
-Player 2:
-UP ARROW = UP
+Player 2:<br>
+UP ARROW = UP<br>
 DOWN ARROW = DOWN
 
 Press ESCAPE during game to access settings menu
